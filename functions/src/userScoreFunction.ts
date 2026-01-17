@@ -24,13 +24,10 @@ export async function fetchUserSessions(
 ): Promise<SessionSummary[]> {
   // Calculate 28 days ago from reference date
   const periodStart = new Date(referenceDate);
-  periodStart.setDate(periodStart.getDate() - 27);
-  periodStart.setHours(0, 0, 0, 0);
+  periodStart.setUTCDate(periodStart.getUTCDate() - 27);
+  periodStart.setUTCHours(0, 0, 0, 0);
 
   try {
-    console.log("🚀 ~ fetchUserSessions ~ periodStart:", periodStart.getTime());
-    console.log("🚀 ~ fetchUserSessions ~ referenceDate:", referenceDate.getTime());
-
     // Single query with compound filter
     const snapshot = await db
       .collection("sessions")
@@ -97,12 +94,10 @@ export const getConsistencyScore = onRequest(async (req, res) => {
 
   const validUserId = validation.userId!;
   const validReferenceDate = validation.referenceDate || new Date();
-  console.log("🚀 ~ validReferenceDate:", validReferenceDate);
 
   try {
     // Fetch user sessions
     const sessions = await fetchUserSessions(db, validUserId, validReferenceDate);
-    console.log("🚀 ~ sessions:", sessions);
 
     // Calculate consistency score
     const result = calculateConsistencyScore(sessions, validReferenceDate);

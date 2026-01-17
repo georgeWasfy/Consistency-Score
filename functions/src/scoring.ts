@@ -15,12 +15,12 @@ export function calculateConsistencyScore(
 ): ConsistencyScore {
   // Define 28-day window
   const periodEnd = new Date(referenceDate);
-  periodEnd.setHours(23, 59, 59, 999);
+  periodEnd.setUTCHours(23, 59, 59, 999);
 
 
   const periodStart = new Date(periodEnd);
-  periodStart.setDate(periodStart.getDate() - 27);
-  periodStart.setHours(0, 0, 0, 0);
+  periodStart.setUTCDate(periodStart.getUTCDate() - 27);
+  periodStart.setUTCHours(0, 0, 0, 0);
 
   // Calculate metrics
   const metrics = calculateMetrics(sessions, periodStart, periodEnd);
@@ -56,7 +56,6 @@ function calculateMetrics(
   const relevantSessions = sessions.filter(
     (s) => s.startDate >= periodStart && s.startDate <= periodEnd
   );
-
   // Group sessions by day
   // <Date, Number of sessions on that day>
   const sessionsByDay = new Map<string, number>();
@@ -66,7 +65,7 @@ function calculateMetrics(
     const dateKey = session.startDate.toISOString().split("T")[0];
     sessionsByDay.set(dateKey, (sessionsByDay.get(dateKey) || 0) + 1);
 
-    const dayOfWeek = session.startDate.getDay();
+    const dayOfWeek = session.startDate.getUTCDay();
     weeklyDistribution[dayOfWeek]++;
   }
 
@@ -96,7 +95,9 @@ function calculateLongestGap(
 ): number {
   if (sessionsByDay.size === 0) return 28;
 
-  const activeDates = Array.from(sessionsByDay.keys()).sort();
+  const activeDates = Array.from(sessionsByDay.keys())
+  .map(d => new Date(d + "T00:00:00Z")) // force UTC
+  .sort((a, b) => a.getTime() - b.getTime());
   let maxGap = 0;
 
   // Check gap from period start to first activity
@@ -192,7 +193,7 @@ function generateExplanations(metrics: ConsistencyMetrics): string[] {
   }
 
   // Include intensity if notable
-  if (metrics.averageSessionsPerActiveDay >= 1.5) {
+  if (metrics.averageSessionsPerActiveDay >= 1.4) {
     explanations.push(
       `High intensity: ${metrics.averageSessionsPerActiveDay.toFixed(1)} sessions per active day`
     );
@@ -227,7 +228,7 @@ function generateChartData(
       date: dateKey,
       count: countsByDay.get(dateKey) || 0,
     });
-    current.setDate(current.getDate() + 1);
+    current.setUTCDate(current.getUTCDate() + 1);
   }
 
   return chartData;

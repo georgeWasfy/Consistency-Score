@@ -43,7 +43,7 @@ export interface SessionDocument {
 
 export type SessionSummary = Pick<
   SessionDocument,
-  "sessionId" | "userId" | "totalDistance" | "totalDuration" | "totalCalories"
+  "sessionId" | "userId" 
 > & { startDate: Date; endDate: Date; durationMinutes: number };
 
 /**
