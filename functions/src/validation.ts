@@ -32,9 +32,9 @@ export function validate(
 
       // Check if date is not too far in the past
       const minPastDate = new Date();
-      minPastDate.setFullYear(minPastDate.getFullYear() - 1);
+      minPastDate.setFullYear(minPastDate.getFullYear() - 2);
       if (parsedDate < minPastDate) {
-        errors.push("referenceDate cannot be more than 1 year in the past");
+        errors.push("referenceDate cannot be more than 2 year in the past");
       }
     }
   }
